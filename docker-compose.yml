@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    ports:
+      - "5057:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: bonus_proposals
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+
+  backend:
+    build: ./Backend
+    container_name: Backend
+    ports:
+      - "3057:3057"
+    depends_on:
+      - postgres
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: admin123
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: bonus_proposals
+    restart: always
+
+  frontend:
+    build: ./Frontend
+    container_name: Frontend
+    ports:
+      - "8085:80"
+    depends_on:
+      - backend
+    restart: always
+
+  hr:
+    build: ./HR
+    container_name: Hr
+    ports:
+      - "8086:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  pgdata:
+
